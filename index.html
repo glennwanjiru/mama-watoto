@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mama Watoto Home Care - Poster Maker</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600;700&family=Montserrat:wght@400;800&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- html2canvas for downloading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Aspect Ratio Classes */
+        .ar-portrait { aspect-ratio: 3/4; }
+        .ar-square { aspect-ratio: 1/1; }
+        .ar-story { aspect-ratio: 9/16; }
+        .ar-landscape { aspect-ratio: 16/9; }
+
+        .poster-container {
+            width: 100%;
+            /* Aspect ratio is set dynamically via JS/Classes */
+            position: relative;
+            overflow: hidden;
+            background-color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Prevent image stretching globally */
+        img {
+            object-fit: cover;
+        }
+
+        /* --- Template Styles --- */
+        
+        /* T1: The Nurturer */
+        .t1-font-head { font-family: 'Playfair Display', serif; }
+        .t1-font-body { font-family: 'Poppins', sans-serif; }
+        .t1-bg { background: #fffbf0; }
+        
+        /* T2: The Professional */
+        .t2-font-head { font-family: 'Poppins', sans-serif; }
+        .t2-bg { background-color: #f0f9ff; }
+
+        /* T3: The Playful */
+        .t3-font-head { font-family: 'Fredoka', sans-serif; }
+        .t3-font-body { font-family: 'Nunito', sans-serif; }
+        .t3-bg { background-color: #ffffff; background-image: radial-gradient(#fcd34d 2px, transparent 2px); background-size: 24px 24px; }
+        
+        /* T4: The Collage */
+        .t4-font-head { font-family: 'Montserrat', sans-serif; }
+        .t4-bg { background: #1e293b; }
+
+        /* T5: The Values (New) */
+        .t5-font-head { font-family: 'Dancing Script', cursive; }
+        .t5-font-body { font-family: 'Poppins', sans-serif; }
+        .t5-bg { background: #fff; }
+
+        /* T6: The Detailed (New) */
+        .t6-font-head { font-family: 'Montserrat', sans-serif; }
+        .t6-font-body { font-family: 'Nunito', sans-serif; }
+        .t6-bg { background: #fdf2f8; }
+
+        .loading-overlay {
+            position: absolute; inset: 0; background: rgba(255,255,255,0.9);
+            display: flex; align-items: center; justify-content: center; z-index: 50;
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col lg:flex-row overflow-hidden font-sans">
+
+    <!-- LEFT SIDEBAR: Controls -->
+    <div class="w-full lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 flex flex-col h-full z-20 shadow-xl">
+        <div class="p-5 border-b border-gray-200 bg-gradient-to-r from-teal-600 to-teal-500 text-white shadow-sm flex justify-between items-center">
+            <div>
+                <h1 class="text-lg font-bold flex items-center"><i class="fas fa-paint-brush mr-2"></i>Poster Studio</h1>
+                <p class="text-teal-100 text-xs mt-0.5">Mama Watoto Home Care</p>
+            </div>
+            <!-- Small Reset Button -->
+            <button onclick="location.reload()" class="text-xs bg-teal-700 px-2 py-1 rounded hover:bg-teal-800" title="Reset All"><i class="fas fa-redo"></i></button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-5 space-y-6">
+            
+            <!-- Aspect Ratio Selector -->
+            <div>
+                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">1. Size / Shape</label>
+                 <div class="grid grid-cols-4 gap-2">
+                     <button onclick="setRatio('portrait')" class="flex flex-col items-center justify-center p-2 border rounded hover:bg-gray-50 focus:ring-2 focus:ring-teal-500">
+                         <div class="w-3 h-4 border-2 border-gray-400 mb-1"></div>
+                         <span class="text-[9px]">Poster</span>
+                     </button>
+                     <button onclick="setRatio('square')" class="flex flex-col items-center justify-center p-2 border rounded hover:bg-gray-50 focus:ring-2 focus:ring-teal-500">
+                         <div class="w-3 h-3 border-2 border-gray-400 mb-1"></div>
+                         <span class="text-[9px]">Square</span>
+                     </button>
+                     <button onclick="setRatio('story')" class="flex flex-col items-center justify-center p-2 border rounded hover:bg-gray-50 focus:ring-2 focus:ring-teal-500">
+                         <div class="w-2.5 h-5 border-2 border-gray-400 mb-1"></div>
+                         <span class="text-[9px]">Story</span>
+                     </button>
+                     <button onclick="setRatio('landscape')" class="flex flex-col items-center justify-center p-2 border rounded hover:bg-gray-50 focus:ring-2 focus:ring-teal-500">
+                         <div class="w-5 h-2.5 border-2 border-gray-400 mb-1"></div>
+                         <span class="text-[9px]">Wide</span>
+                     </button>
+                 </div>
+            </div>
+
+            <!-- Template Selector -->
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">2. Choose Template</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setTemplate(1)" class="p-3 border rounded-lg hover:border-red-300 hover:bg-red-50 transition text-left group">
+                        <div class="font-bold text-gray-700 text-xs group-hover:text-red-500">The Nurturer</div>
+                        <div class="text-[9px] text-gray-400">Warm & Soft</div>
+                    </button>
+                    <button onclick="setTemplate(2)" class="p-3 border rounded-lg hover:border-teal-300 hover:bg-teal-50 transition text-left group">
+                        <div class="font-bold text-gray-700 text-xs group-hover:text-teal-600">Professional</div>
+                        <div class="text-[9px] text-gray-400">Trust Focused</div>
+                    </button>
+                    <button onclick="setTemplate(3)" class="p-3 border rounded-lg hover:border-yellow-300 hover:bg-yellow-50 transition text-left group">
+                        <div class="font-bold text-gray-700 text-xs group-hover:text-yellow-600">Playful</div>
+                        <div class="text-[9px] text-gray-400">Fun & Bright</div>
+                    </button>
+                    <button onclick="setTemplate(4)" class="p-3 border rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition text-left group">
+                        <div class="font-bold text-gray-700 text-xs group-hover:text-indigo-600">Collage</div>
+                        <div class="text-[9px] text-gray-400">Multi-Photo</div>
+                    </button>
+                    <button onclick="setTemplate(5)" class="p-3 border rounded-lg hover:border-pink-300 hover:bg-pink-50 transition text-left group">
+                        <div class="font-bold text-gray-700 text-xs group-hover:text-pink-600">Values</div>
+                        <div class="text-[9px] text-gray-400">Elegant Text</div>
+                    </button>
+                    <button onclick="setTemplate(6)" class="p-3 border rounded-lg hover:border-green-300 hover:bg-green-50 transition text-left group">
+                        <div class="font-bold text-gray-700 text-xs group-hover:text-green-600">Detailed</div>
+                        <div class="text-[9px] text-gray-400">Lists all Roles</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Image Management -->
+            <div class="border-t border-gray-100 pt-4">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">3. Photos</label>
+                
+                <!-- Quick Select -->
+                <div class="mb-4">
+                    <p class="text-[10px] text-gray-400 mb-2">Quick Stock Photos (Click to use):</p>
+                    <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+                        <img onclick="setMainImage(this.src)" src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" class="w-10 h-10 rounded object-cover cursor-pointer hover:ring-2 hover:ring-teal-500 border border-gray-200">
+                        <img onclick="setMainImage(this.src)" src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" class="w-10 h-10 rounded object-cover cursor-pointer hover:ring-2 hover:ring-teal-500 border border-gray-200">
+                        <img onclick="setMainImage(this.src)" src="https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" class="w-10 h-10 rounded object-cover cursor-pointer hover:ring-2 hover:ring-teal-500 border border-gray-200">
+                         <img onclick="setMainImage(this.src)" src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" class="w-10 h-10 rounded object-cover cursor-pointer hover:ring-2 hover:ring-teal-500 border border-gray-200">
+                         <img onclick="setMainImage(this.src)" src="https://images.unsplash.com/photo-1476703993599-0035a21b17a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" class="w-10 h-10 rounded object-cover cursor-pointer hover:ring-2 hover:ring-teal-500 border border-gray-200">
+                    </div>
+                </div>
+
+                <!-- Uploads -->
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-2">
+                        <label class="flex-1 cursor-pointer bg-white border border-gray-300 rounded px-3 py-2 hover:bg-gray-50 transition text-xs text-gray-600 truncate flex items-center shadow-sm">
+                            <i class="fas fa-camera mr-2 text-teal-600"></i> Main Image
+                            <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 0)">
+                        </label>
+                    </div>
+                    <!-- Secondary images for Collage -->
+                     <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer bg-white border border-gray-300 rounded px-2 py-2 hover:bg-gray-50 transition text-xs text-gray-600 truncate flex items-center justify-center shadow-sm">
+                            <i class="fas fa-plus mr-1"></i> 2nd Img
+                            <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 1)">
+                        </label>
+                        <label class="cursor-pointer bg-white border border-gray-300 rounded px-2 py-2 hover:bg-gray-50 transition text-xs text-gray-600 truncate flex items-center justify-center shadow-sm">
+                            <i class="fas fa-plus mr-1"></i> 3rd Img
+                            <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 2)">
+                        </label>
+                     </div>
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="border-t border-gray-100 pt-4 space-y-3">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide">4. Details</label>
+                
+                 <!-- Slogan Selection -->
+                 <div>
+                    <label class="text-[10px] text-gray-400 font-bold mb-1 block">Slogan / Value</label>
+                    <select id="sloganSelect" onchange="updatePoster()" class="w-full p-2 border rounded text-xs focus:border-teal-500 outline-none bg-white">
+                        <option value="With patience, kindness, and care">With patience, kindness, and care</option>
+                        <option value="A home filled with warmth and understanding">A home filled with warmth & understanding</option>
+                        <option value="Caring hands, loving hearts">Caring hands, loving hearts</option>
+                        <option value="Where children feel safe, valued, and happy">Where children feel safe, valued, & happy</option>
+                        <option value="More than care — a second home">More than care — a second home</option>
+                        <option value="Where Little Hearts Are Cared For Like Family">Where Little Hearts Are Cared For Like Family</option>
+                        <option value="Because Every Child Deserves Gentle, Trusted Care">Every Child Deserves Gentle Care</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                     <input type="text" id="phoneInput" value="+254 712 345 678" placeholder="Phone" class="w-full p-2 border rounded text-xs focus:border-teal-500 outline-none" oninput="updatePoster()">
+                     <input type="text" id="socialInput" value="@MamaWatotoCare" placeholder="Social" class="w-full p-2 border rounded text-xs focus:border-teal-500 outline-none" oninput="updatePoster()">
+                </div>
+                <input type="text" id="locationInput" value="Westlands, Nairobi" placeholder="Location" class="w-full p-2 border rounded text-xs focus:border-teal-500 outline-none" oninput="updatePoster()">
+            </div>
+        </div>
+
+        <!-- Download Action -->
+        <div class="p-5 border-t border-gray-200 bg-gray-50">
+            <button onclick="downloadPoster()" id="downloadBtn" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition flex items-center justify-center transform active:scale-95">
+                <i class="fas fa-download mr-2"></i> Download Image
+            </button>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE: Preview Canvas -->
+    <div class="flex-1 bg-gray-200/80 flex items-center justify-center p-4 lg:p-8 overflow-y-auto relative">
+        
+        <!-- Loading Spinner -->
+        <div id="loadingOverlay" class="loading-overlay hidden rounded-xl">
+            <div class="text-center">
+                <div class="w-12 h-12 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin mx-auto mb-3"></div>
+                <p class="font-bold text-gray-700 text-sm tracking-wide">SAVING...</p>
+            </div>
+        </div>
+
+        <!-- The Poster Area -->
+        <div id="wrapper" class="w-full max-w-lg shadow-2xl transition-all duration-300">
+             <div id="posterArea" class="poster-container bg-white">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const stockImages = [
+            "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+        ];
+        
+        let state = {
+            templateId: 5, // Default to new Values template
+            ratio: 'portrait',
+            images: [...stockImages], 
+            phone: "",
+            location: "",
+            social: "",
+            slogan: "",
+            roles: [
+                "Provide Safe and Loving Care",
+                "Meet basic daily needs",
+                "Support Learning and Development",
+                "Offer Emotional Support",
+                "Work in Partnership with Parent",
+                "Teach Values and Good Behavior",
+                "Support Health and Well-Being",
+                "Maintain Clean Environment"
+            ]
+        };
+
+        // --- INIT ---
+        window.onload = function() {
+            updateStateFromInputs();
+            renderPoster();
+        };
+
+        function updateStateFromInputs() {
+            state.phone = document.getElementById('phoneInput').value;
+            state.location = document.getElementById('locationInput').value;
+            state.social = document.getElementById('socialInput').value;
+            state.slogan = document.getElementById('sloganSelect').value;
+        }
+
+        function updatePoster() {
+            updateStateFromInputs();
+            renderPoster();
+        }
+
+        function setTemplate(id) {
+            state.templateId = id;
+            renderPoster();
+        }
+
+        function setRatio(ratio) {
+            state.ratio = ratio;
+            renderPoster();
+        }
+
+        function setMainImage(src) {
+            state.images[0] = src;
+            renderPoster();
+        }
+
+        function handleImageUpload(event, index) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    state.images[index] = e.target.result;
+                    renderPoster();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // --- RENDER LOGIC ---
+        function renderPoster() {
+            const container = document.getElementById('posterArea');
+            const wrapper = document.getElementById('wrapper');
+            
+            // Set Aspect Ratio Class
+            container.className = 'poster-container'; // clear
+            if(state.ratio === 'portrait') container.classList.add('ar-portrait');
+            if(state.ratio === 'square') container.classList.add('ar-square');
+            if(state.ratio === 'story') container.classList.add('ar-story');
+            if(state.ratio === 'landscape') container.classList.add('ar-landscape');
+
+            // Responsive Width for Preview
+            if(state.ratio === 'landscape') wrapper.style.maxWidth = '700px';
+            else wrapper.style.maxWidth = '450px';
+            
+            let html = '';
+
+            // --- TEMPLATE 1: THE NURTURER (Refined) ---
+            if (state.templateId === 1) {
+                container.classList.add('t1-bg');
+                html = `
+                    <div class="h-full flex flex-col relative">
+                        <!-- Curved Header -->
+                        <div class="h-1/3 relative overflow-hidden">
+                            <img src="${state.images[0]}" class="w-full h-full object-cover">
+                            <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#fffbf0] to-transparent"></div>
+                        </div>
+
+                        <div class="flex-1 px-8 pb-4 relative -mt-6 flex flex-col">
+                            <div class="bg-white rounded-3xl p-6 shadow-xl border border-orange-50 text-center relative z-10 flex-1 flex flex-col justify-center">
+                                <h1 class="text-3xl t1-font-head font-bold text-gray-800 mb-1">MAMA WATOTO</h1>
+                                <p class="text-xs tracking-[0.2em] uppercase text-orange-400 font-bold mb-4">Home Care Services</p>
+                                
+                                <p class="text-sm italic text-gray-500 mb-6 t1-font-body">"${state.slogan}"</p>
+
+                                <div class="grid grid-cols-2 gap-2 text-left">
+                                    ${state.roles.slice(0,6).map(role => `
+                                        <div class="flex items-center text-[10px] text-gray-600 font-medium">
+                                            <div class="w-1 h-1 rounded-full bg-orange-300 mr-2 flex-shrink-0"></div>
+                                            <span class="truncate">${role}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <div class="mt-4 text-center z-10 pb-4">
+                                <div class="inline-block bg-gray-800 text-white px-5 py-2 rounded-full font-bold text-md shadow-lg">
+                                    <i class="fas fa-phone-alt mr-2 text-orange-300"></i>${state.phone}
+                                </div>
+                                <div class="flex justify-center space-x-3 text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-2">
+                                    <span>${state.location}</span>
+                                    <span>•</span>
+                                    <span>${state.social}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } 
+            
+            // --- TEMPLATE 2: THE PROFESSIONAL (Refined) ---
+            else if (state.templateId === 2) {
+                container.classList.add('t2-bg');
+                html = `
+                    <div class="h-full flex flex-col p-4">
+                        <div class="border border-teal-600 h-full flex flex-col relative bg-white shadow-sm">
+                            <!-- Logo Area -->
+                            <div class="bg-teal-700 text-white p-4 text-center">
+                                <h1 class="text-2xl font-bold tracking-tight">MAMA WATOTO</h1>
+                                <p class="text-teal-100 text-[10px] uppercase tracking-widest">Premium Home Care</p>
+                            </div>
+
+                            <!-- Main Image -->
+                            <div class="flex-1 overflow-hidden relative group min-h-[150px]">
+                                <img src="${state.images[0]}" class="w-full h-full object-cover">
+                                <div class="absolute bottom-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold text-teal-800 shadow">
+                                    <i class="fas fa-check-circle mr-1"></i> Verified
+                                </div>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="p-4 flex flex-col">
+                                <div class="mb-2">
+                                    <h3 class="text-teal-800 font-bold border-b border-teal-100 pb-1 mb-2 text-xs">OUR STANDARDS</h3>
+                                    <div class="grid grid-cols-2 gap-x-2 gap-y-1">
+                                        ${state.roles.slice(0,6).map(role => `
+                                            <div class="flex items-center text-[10px] text-gray-600">
+                                                <i class="fas fa-check text-[8px] text-teal-500 mr-1.5"></i>
+                                                <span class="truncate">${role}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="bg-gray-50 p-2 rounded border border-gray-100 mt-2 flex justify-between items-center">
+                                    <div>
+                                        <div class="text-[10px] text-gray-500 uppercase font-bold">Contact</div>
+                                        <div class="text-sm font-bold text-teal-700">${state.phone}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-[10px] text-gray-500 uppercase font-bold">Location</div>
+                                        <div class="text-[10px] font-medium text-gray-700">${state.location.split(',')[0]}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEMPLATE 3: THE PLAYFUL (Refined) ---
+            else if (state.templateId === 3) {
+                container.classList.add('t3-bg');
+                html = `
+                    <div class="h-full p-4 flex flex-col relative overflow-hidden">
+                        <!-- Header -->
+                        <div class="relative z-10 text-center mb-2 mt-2">
+                            <span class="bg-black text-white text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wide font-bold mb-1 inline-block">Safe & Fun</span>
+                            <h1 class="text-4xl t3-font-head text-yellow-500 drop-shadow-sm leading-none" style="-webkit-text-stroke: 1px black;">MAMA<br>WATOTO</h1>
+                        </div>
+
+                        <!-- Image Frame -->
+                        <div class="relative z-10 mx-auto w-3/4 aspect-square bg-white p-2 shadow-xl transform -rotate-2 mb-4">
+                            <div class="absolute -top-2 -left-2 w-6 h-6 bg-blue-400 rounded-full z-20 border-2 border-white"></div>
+                            <img src="${state.images[0]}" class="w-full h-full object-cover border border-gray-100">
+                        </div>
+
+                        <!-- List -->
+                        <div class="flex-1 relative z-10 flex flex-col justify-center">
+                            <div class="bg-white/90 backdrop-blur rounded-xl p-3 shadow-sm border-2 border-gray-100">
+                                <p class="text-center text-xs font-bold text-gray-500 mb-2">"${state.slogan}"</p>
+                                <div class="grid grid-cols-2 gap-1">
+                                    ${state.roles.slice(0,4).map((role, i) => `
+                                        <div class="bg-${['red','blue','green','yellow'][i%4]}-50 rounded px-2 py-1 text-center">
+                                            <p class="text-[9px] font-bold text-gray-800 truncate">${role}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="relative z-10 mt-2 bg-black text-white rounded-xl p-3 flex justify-between items-center shadow-lg">
+                            <div class="text-left">
+                                <div class="font-bold text-lg text-yellow-400 leading-none">${state.phone}</div>
+                                <div class="text-[9px] text-gray-300">${state.social}</div>
+                            </div>
+                            <div class="text-right">
+                                <i class="fas fa-smile text-2xl text-yellow-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEMPLATE 4: THE COLLAGE ---
+            else if (state.templateId === 4) {
+                container.classList.add('t4-bg');
+                html = `
+                    <div class="h-full flex flex-col text-white">
+                        <div class="p-4 border-b border-gray-700 flex justify-between items-end">
+                            <h1 class="text-2xl t4-font-head font-black tracking-tighter text-white leading-none">MAMA<br>WATOTO</h1>
+                            <div class="text-[9px] bg-indigo-600 px-2 py-1 rounded">Trusted Care</div>
+                        </div>
+
+                        <!-- Flexible Grid -->
+                        <div class="p-2 flex-1 grid grid-cols-2 gap-2">
+                            <!-- Main Big Image -->
+                            <div class="col-span-2 h-2/3 rounded-xl overflow-hidden relative">
+                                <img src="${state.images[0]}" class="w-full h-full object-cover">
+                                <div class="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/80 to-transparent">
+                                    <p class="text-xs font-bold italic">"${state.slogan}"</p>
+                                </div>
+                            </div>
+                            <!-- Small Images -->
+                            <div class="h-full rounded-xl overflow-hidden relative">
+                                <img src="${state.images[1] || state.images[0]}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="h-full rounded-xl overflow-hidden relative">
+                                <img src="${state.images[2] || state.images[0]}" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="bg-indigo-900 p-4 mt-auto">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xl font-bold">${state.phone}</p>
+                                    <p class="text-[10px] text-indigo-300">${state.location}</p>
+                                </div>
+                                <div class="text-right">
+                                    <i class="fab fa-whatsapp text-2xl text-green-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEMPLATE 5: THE VALUES (New) ---
+            else if (state.templateId === 5) {
+                container.classList.add('t5-bg');
+                html = `
+                    <div class="h-full relative flex flex-col">
+                        <!-- Full Background Image with Overlay -->
+                        <div class="absolute inset-0">
+                            <img src="${state.images[0]}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-pink-900/40 mix-blend-multiply"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+                        </div>
+
+                        <!-- Content on Top -->
+                        <div class="relative z-10 h-full flex flex-col justify-between p-6 text-center text-white">
+                            <div class="mt-4">
+                                <h1 class="text-lg tracking-[0.3em] uppercase opacity-90 border-b border-white/30 inline-block pb-2">Mama Watoto</h1>
+                            </div>
+
+                            <div class="my-auto">
+                                <i class="fas fa-heart text-2xl text-pink-300 mb-4 opacity-80"></i>
+                                <h2 class="text-4xl md:text-5xl t5-font-head leading-tight mb-4 drop-shadow-lg">
+                                    ${state.slogan.split(',')[0]}...
+                                </h2>
+                                <p class="text-sm font-light opacity-90 t5-font-body px-4">
+                                    ${state.slogan}
+                                </p>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="inline-block bg-white/20 backdrop-blur-md border border-white/30 px-6 py-3 rounded-full">
+                                    <p class="text-xl font-bold">${state.phone}</p>
+                                    <p class="text-[10px] uppercase tracking-widest mt-1">Book a visit • ${state.location.split(',')[0]}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEMPLATE 6: THE DETAILED (New) ---
+            else if (state.templateId === 6) {
+                container.classList.add('t6-bg');
+                html = `
+                    <div class="h-full flex flex-col relative">
+                        <!-- Top Half Image -->
+                        <div class="h-1/3 relative">
+                            <img src="${state.images[0]}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-green-900/20"></div>
+                            <div class="absolute bottom-0 left-0 bg-white px-4 py-2 rounded-tr-xl">
+                                <h1 class="text-xl font-bold text-green-800 t6-font-head">MAMA WATOTO</h1>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Half List -->
+                        <div class="flex-1 p-5 flex flex-col">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <p class="text-xs text-gray-600 italic">"${state.slogan}"</p>
+                            </div>
+
+                            <div class="bg-white rounded-xl shadow-sm border border-green-50 p-4 flex-1">
+                                <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-wider">Our Services</h3>
+                                <div class="grid grid-cols-1 gap-1.5 overflow-hidden">
+                                    ${state.roles.map(role => `
+                                        <div class="flex items-center">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-green-400 mr-2 flex-shrink-0"></div>
+                                            <p class="text-[10px] text-gray-700 font-medium truncate leading-tight">${role}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex justify-between items-end border-t border-gray-200 pt-3">
+                                <div>
+                                    <p class="text-[9px] text-gray-400 uppercase">Contact Us</p>
+                                    <p class="text-lg font-bold text-gray-800 leading-none">${state.phone}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[9px] text-green-600 font-bold">${state.social}</p>
+                                    <p class="text-[9px] text-gray-500">${state.location}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // --- DOWNLOAD LOGIC ---
+        async function downloadPoster() {
+            const btn = document.getElementById('downloadBtn');
+            const overlay = document.getElementById('loadingOverlay');
+            const poster = document.getElementById('posterArea');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating...';
+            overlay.classList.remove('hidden');
+
+            try {
+                await new Promise(resolve => setTimeout(resolve, 800));
+
+                const canvas = await html2canvas(poster, {
+                    scale: 3, 
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null
+                });
+
+                const link = document.createElement('a');
+                link.download = `Mama_Watoto_${state.ratio}_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+
+            } catch (err) {
+                console.error("Download failed:", err);
+                alert("Could not generate image. Please try again.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-download mr-2"></i> Download Image';
+                overlay.classList.add('hidden');
+            }
+        }
+
+    </script>
+</body>
+</html>
